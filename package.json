@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "ascii-table": "^0.0.9",
+    "crypto": "^1.0.1",
+    "js-sha3": "^0.9.3",
+    "readline-sync": "^1.4.10"
+  }
+}
