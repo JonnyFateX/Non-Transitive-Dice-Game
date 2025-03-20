@@ -124,7 +124,7 @@ function getUserSelection(text, options){
         process.exit()
     }else if(response === "?"){
         printOddsTable(globalDices)
-        process.exit()
+        return getUserSelection(text, options)
     }else if(parseInt(response) < options.length){
         return parseInt(response)
     }else{
