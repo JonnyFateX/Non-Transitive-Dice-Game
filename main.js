@@ -1,15 +1,28 @@
 const {
-    createHmac,
-    generateKeySync,
+    printOddsTable
+} = require('./functions/help.js')
+
+const {
+    generateNumber
+} = require('./functions/secure.js')
+
+const {
     randomInt,
 } = require('node:crypto')
+
 const readlineSync = require('readline-sync')
-var AsciiTable = require('ascii-table')
 
 let dices = process.argv.slice(2)
 if(dices.length < 3){
-    console.log("Not enough dices, this game requires at least 3 dices.")
-    return
+    throw new Error("Not enough dices, this game requires at least 3 dices.")
+}
+for(let i = 0; i < dices.length; i++){
+    if(dices[i].split(",").length !== 6){
+        throw new Error("Every dice should contain 6 sides")
+    }
+    if(!(dices[i].split(",")).every(item => !isNaN(item) && typeof item === 'string')){
+        throw new Error("Every dice should contain only numbers as sides")
+    }
 }
 
 const globalDices = [...dices]
@@ -97,17 +110,6 @@ if(userRolledNumber > computerRolledNumber){
     console.log(`You lose (${userRolledNumber} < ${computerRolledNumber})`)
 }
 
-function generateNumber(range){
-    const key = generateKeySync('hmac', { length: 256 }).export().toString('hex').toUpperCase()
-    const selection = randomInt(0, range)
-    const hmac = createHmac('sha256', key).update(selection.toString()).digest("base16")
-    return {
-        key: key,
-        hmac: hmac,
-        selection: selection
-    }
-}
-
 function getUserSelection(text, options){
     for(let i = 0; i < text.length; i++){
         console.log(text[i])
@@ -129,35 +131,4 @@ function getUserSelection(text, options){
         console.log("Selection not found, please restart game.")
         process.exit()
     }
-}
-
-function printOddsTable(dices){
-    console.log("Probability of the win for the user:")
-    const odds = []
-    for(let i = 0; i < dices.length; i++){//user dice loop
-        const oddRow = []
-        for(let j = 0; j < dices.length; j++){//oponent dice
-            oddRow.push(getDiceProbability(dices[i].split(","), dices[j].split(",")))
-        }
-        odds.push(oddRow)
-    }
-
-    let table = new AsciiTable('Winning Odds')
-    table.setHeading("User dice", ...dices)
-    for(let i = 0; i < dices.length; i++){
-        table.addRow(dices[i], ...odds[i])
-    }
-    console.log(table.toString())
-}
-
-function getDiceProbability(dice1, dice2){
-    let winningScenarios = 0
-    for(let i = 0; i < dice1.length; i++){
-        for(let j = 0; j < dice2.length; j++){
-            if(parseInt(dice1[i]) > parseInt(dice2[j])){
-                winningScenarios++
-            }
-        }
-    }
-    return (winningScenarios/(dice1.length*dice2.length)).toFixed(4)
 }
